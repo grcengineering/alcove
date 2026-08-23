@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-theme-preference="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALCOVE — Assurance Levels for Control Operating Viability &amp; Effectiveness</title>
+<meta name="description" content="ALCOVE is a proposed assurance framework for security compliance: four levels of increasing rigour about whether your controls are actually operating — historically, across full populations, against real threats.">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alcove.grc.engineering/">
+<meta property="og:title" content="ALCOVE — Assurance Levels for Control Operating Viability &amp; Effectiveness">
+<meta property="og:description" content="A proposed assurance framework for security compliance. Four levels of increasing rigour about whether your controls are actually operating.">
+<meta property="og:site_name" content="GRC Engineering">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ALCOVE — Assurance Levels for Control Operating Viability &amp; Effectiveness">
+<meta name="twitter:description" content="A proposed assurance framework for security compliance. Four levels of increasing rigour about whether your controls are actually operating.">
+<link rel="canonical" href="https://alcove.grc.engineering/">
+
+<script>
+  // GRC Engineering theme — resolve light/dark/system to a concrete data-theme
+  // BEFORE paint so OS-dark users never see a light flash.
+  (function () {
+    function systemTheme() {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function apply(pref) {
+      var theme = pref === 'system' ? systemTheme() : pref;
+      var el = document.documentElement;
+      el.setAttribute('data-theme', theme);
+      el.setAttribute('data-theme-preference', pref);
+    }
+    try { apply(localStorage.getItem('grc-theme') || 'system'); } catch (e) { apply('system'); }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+      try { if ((localStorage.getItem('grc-theme') || 'system') === 'system') apply('system'); } catch (e) {}
+    });
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'grc-theme') apply(e.newValue || 'system');
+    });
+  })();
+</script>
+
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/general-sans-vf.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/satoshi-vf.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/archivo-vf.woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="site-header">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="ALCOVE — home">
+      <span class="wordmark wordmark--sm" role="img" aria-label="ALCOVE">
+        <span aria-hidden="true">ALC</span>
+        <svg class="wm-o" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <circle cx="50" cy="50" r="49" fill="var(--brand-eng)"/>
+          <circle cx="50" cy="50" r="35" fill="var(--eng-blue-700)"/>
+          <circle cx="50" cy="50" r="27" fill="var(--slate-0)"/>
+          <circle cx="50" cy="50" r="22" fill="var(--green-500)"/>
+          <path d="M39.5 50.5 47 58 62 42" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span aria-hidden="true">VE</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Sections">
+      <a href="#what">What it is</a>
+      <a href="#problem">The problem</a>
+      <a href="#levels">Levels</a>
+      <a href="#threat-informed">Threat-informed</a>
+      <a href="#reporting">Reporting</a>
+      <a href="#implementations">Implementations</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="icon-btn" href="https://github.com/grcengineering" aria-label="GRC Engineering on GitHub" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 .5C5.73.5.99 5.24.99 11.5c0 4.86 3.15 8.98 7.52 10.44.55.1.75-.24.75-.53v-1.86c-3.06.67-3.71-1.48-3.71-1.48-.5-1.28-1.23-1.62-1.23-1.62-1-.69.08-.67.08-.67 1.11.08 1.69 1.14 1.69 1.14.98 1.69 2.58 1.2 3.21.92.1-.71.39-1.2.7-1.48-2.44-.28-5.01-1.22-5.01-5.44 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.11-2.92 0 0 .93-.3 3.04 1.13a10.5 10.5 0 0 1 5.54 0c2.11-1.43 3.03-1.13 3.03-1.13.6 1.52.22 2.64.11 2.92.71.77 1.13 1.75 1.13 2.95 0 4.23-2.58 5.16-5.03 5.43.4.34.75 1.02.75 2.06v3.05c0 .29.2.64.76.53a10.53 10.53 0 0 0 7.51-10.44C23.01 5.24 18.27.5 12 .5Z"/></svg>
+      </a>
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+        <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="theme-icon theme-icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ══════════════════════════════════════════════════ HERO ══ -->
+<section class="hero">
+  <div class="hero-backdrop" id="hero-backdrop" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="proposal-chip"><span class="dot"></span> A proposal, openly published</span>
+
+    <span class="wordmark wordmark--lg hero-mark" role="img" aria-label="ALCOVE">
+      <span aria-hidden="true">ALC</span>
+      <svg class="wm-o" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <circle cx="50" cy="50" r="49" fill="var(--eng-blue-400)"/>
+        <circle cx="50" cy="50" r="35" fill="var(--eng-blue-700)"/>
+        <circle cx="50" cy="50" r="27" fill="#0C1117"/>
+        <circle cx="50" cy="50" r="22" fill="var(--green-500)"/>
+        <path d="M39.5 50.5 47 58 62 42" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span aria-hidden="true">VE</span>
+    </span>
+
+    <h1>In-depth continuous assurance over shallow periodic monitoring</h1>
+
+    <p class="lede">Every security compliance framework asks whether a control exists. Almost none of them can tell you whether it has been <em>operating</em> — across a full population, over an entire audit period, against the threats it was built to stop. ALCOVE is a proposed set of assurance levels for closing that gap.</p>
+
+    <div class="hero-cta">
+      <a class="btn btn--primary" href="#levels">See the levels
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn--on-ink" href="https://blog.grc.engineering/p/soc-2-is-dead-long-live-soc-2" rel="noopener">Read the original proposal</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ WHAT IS ALCOVE ══ -->
+<section class="define" id="what">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">What is ALCOVE?</span>
+      <p class="lede"><strong>Assurance Levels for Control Operating Viability &amp; Effectiveness.</strong> It is a graduated way to say how much is actually known about a set of security controls — from "someone looked at the design" all the way to "the full population of evidence was assessed, historically, against the threats these controls exist to mitigate."</p>
+      <p>ALCOVE takes its shape from <a href="https://slsa.dev" rel="noopener">SLSA</a>, the supply-chain assurance framework: levels give organisations somewhere to start and somewhere to climb, and give the people relying on them a way to ask for a specific rung instead of a yes/no.</p>
+      <ul class="expand">
+        <li><b>A</b>ssurance</li>
+        <li><b>L</b>evels for</li>
+        <li><b>C</b>ontrol</li>
+        <li><b>O</b>perating</li>
+        <li><b>V</b>iability &amp;</li>
+        <li><b>E</b>ffectiveness</li>
+      </ul>
+    </div>
+
+    <div class="define-figure">
+      <span class="eyebrow" style="margin-bottom:var(--space-4)">The ladder</span>
+      <ol class="ladder">
+        <li class="ladder-row ladder--1"><span class="lv">1</span><span class="txt">Design assessed</span></li>
+        <li class="ladder-row ladder--2"><span class="lv">2</span><span class="txt">Samples assessed</span></li>
+        <li class="ladder-row ladder--3"><span class="lv">3</span><span class="txt">Full populations, history <em>and</em> state</span></li>
+        <li class="ladder-row ladder--4"><span class="lv">4</span><span class="txt">All of the above, threat-informed</span></li>
+      </ol>
+      <p class="small muted" style="margin:var(--space-5) 0 0">Each level is cumulative. Level 4 includes everything below it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ PROBLEM ══ -->
+<section class="section" id="problem">
+  <div class="wrap">
+    <span class="eyebrow">The problem</span>
+    <h2>Three ingredients, three failures</h2>
+    <p class="lede prose" style="margin-top:var(--space-5)">Every security compliance framework is built from the same three parts: a set of <strong>requirements</strong> controls must meet, an <strong>audit methodology</strong> for judging how well they meet them, and a <strong>reporting artifact</strong> that conveys the result. Each part is failing in a way that limits how much assurance the whole thing can possibly provide.</p>
+
+    <div class="grid-3" style="margin-top:var(--space-10)">
+      <article class="card flaw">
+        <span class="n">01 · Requirements</span>
+        <h3>Vague solutions for unclear problems</h3>
+        <p>Control requirements are written without explicit reference to the threats they are meant to guard against, so organisations design controls that satisfy the wording without ever being shown to stop anything.</p>
+        <blockquote>Imagine car safety written this way: “the car implements physical restraint measures to protect passengers against threats from abrupt deceleration events.”</blockquote>
+      </article>
+
+      <article class="card flaw">
+        <span class="n">02 · Audit methodology</span>
+        <h3>20th-century methods, 21st-century systems</h3>
+        <p>Transactional controls — access requests, provisioning, change tickets — do get tested historically, because a ticketing system leaves a trail. But <strong>stateful technical controls</strong> like at-rest encryption, EDR and WAFs are assessed only for their <em>current</em> state.</p>
+        <blockquote>It doesn’t matter whether the audit period is 1 month or 12. A control tested only at the moment evidence was gathered was never really tested over the period.</blockquote>
+      </article>
+
+      <article class="card flaw">
+        <span class="n">03 · Reporting artifact</span>
+        <h3>Static documents, dynamic environments</h3>
+        <p>Modern organisations change their systems dozens to thousands of times a day, and every change can quietly break a control. The report describing those controls is a PDF finalised weeks after the last evidence was reviewed.</p>
+        <blockquote>Why do we treat a point-in-time report as carrying assurance value more than a week after it was finalised?</blockquote>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ LEVELS ══ -->
+<section class="section grc-grid-bg" id="levels" style="border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)">
+  <div class="wrap">
+    <span class="eyebrow">Assurance levels</span>
+    <h2>Four levels, one question: how much is actually known?</h2>
+    <p class="lede prose" style="margin-top:var(--space-5)">Levels are a shared vocabulary. An organisation can name the rung it is on; the people relying on it can require a specific rung instead of accepting a pass/fail. Each level is cumulative — every level contains the one below it.</p>
+
+    <div class="levels">
+
+      <article class="level level--1">
+        <div class="level-id">
+          <span class="tag">Level 1</span>
+          <span class="num">1</span>
+          <span class="rungs" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></span>
+        </div>
+        <div>
+          <span class="req-label">Requirements</span>
+          <p class="req">Control designs assessed for viability.</p>
+        </div>
+        <div>
+          <span class="for-label">Intended for</span>
+          <p class="for">Demonstrating commitment to pursuing independent third-party assessment of control operating effectiveness.</p>
+        </div>
+      </article>
+
+      <article class="level level--2">
+        <div class="level-id">
+          <span class="tag">Level 2</span>
+          <span class="num">2</span>
+          <span class="rungs" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+        </div>
+        <div>
+          <span class="req-label">Requirements</span>
+          <p class="req">Level 1 requirements + samples of control evidence assessed for <em>historical transactions</em> or <em>current state</em>.</p>
+        </div>
+        <div>
+          <span class="for-label">Intended for</span>
+          <p class="for">Providing basic, short-lived assurance about control operating effectiveness.</p>
+        </div>
+      </article>
+
+      <article class="level level--3">
+        <div class="level-id">
+          <span class="tag">Level 3</span>
+          <span class="num">3</span>
+          <span class="rungs" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+        <div>
+          <span class="req-label">Requirements</span>
+          <p class="req">Level 2 requirements + full populations of control evidence assessed for historical transactions <strong>and</strong> state.</p>
+        </div>
+        <div>
+          <span class="for-label">Intended for</span>
+          <p class="for">Providing strong, long-lived assurance about control operating effectiveness.</p>
+        </div>
+      </article>
+
+      <article class="level level--4">
+        <div class="level-id">
+          <span class="tag">Level 4</span>
+          <span class="num">4</span>
+          <span class="rungs" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+        </div>
+        <div>
+          <span class="req-label">Requirements</span>
+          <p class="req">Level 3 requirements, including control implementations based on Common Threat Mitigations (CTM) to guard against Common Threat Criteria (CTC).</p>
+        </div>
+        <div>
+          <span class="for-label">Intended for</span>
+          <p class="for">Providing strong, long-lived, threat-informed assurance about control operating effectiveness.</p>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ALCOVE + SOC 2 -->
+    <div style="margin-top:var(--space-20)">
+      <span class="eyebrow">ALCOVE + SOC 2</span>
+      <h2>Extend the report types rather than replace the framework</h2>
+      <p class="lede prose" style="margin:var(--space-5) 0 var(--space-8)">SOC 2 Type I and Type II still exist in this world and still carry their (limited) value. Extending the report types to III and IV lets SOC 2 express the higher rungs.</p>
+
+      <div class="tbl-shell">
+        <div class="scroller">
+          <table class="tbl">
+            <caption class="visually-hidden-caption">SOC 2 report types extended to align with ALCOVE levels</caption>
+            <thead>
+              <tr><th scope="col">Type</th><th scope="col">Focus</th><th scope="col">Aligns to</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" class="type-cell">I</th>
+                <td>Suitability of controls to meet Trust Services Criteria (TSC)</td>
+                <td class="maps-to">—</td>
+              </tr>
+              <tr>
+                <th scope="row" class="type-cell">II</th>
+                <td>Suitability &amp; <strong>effectiveness</strong> of controls to meet TSC</td>
+                <td class="maps-to">—</td>
+              </tr>
+              <tr class="is-alcove">
+                <th scope="row" class="type-cell">III</th>
+                <td>Suitability &amp; <strong>comprehensive historical</strong> effectiveness of controls to meet TSC</td>
+                <td class="maps-to">ALCOVE Level 3</td>
+              </tr>
+              <tr class="is-alcove is-l4">
+                <th scope="row" class="type-cell">IV</th>
+                <td>Suitability &amp; comprehensive historical effectiveness of controls to meet TSC <strong>&amp; protect against Common Threat Criteria (CTC) via Common Mitigation Criteria (CMC)</strong></td>
+                <td class="maps-to">ALCOVE Level 4</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="small muted" style="margin-top:var(--space-4)">Reproduced from the original proposal. Note the naming: the mitigation half of the threat model appears as <strong>Common Threat Mitigations (CTM)</strong> in the levels table and the worked example below, and as <strong>Common Mitigation Criteria (CMC)</strong> here. Settling on one name is an open question for the framework.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ THREAT-INFORMED ══ -->
+<section class="section" id="threat-informed">
+  <div class="wrap">
+    <span class="eyebrow">Level 4 · Threat-informed criteria</span>
+    <h2>Requirements that name the threat</h2>
+    <p class="lede prose" style="margin-top:var(--space-5)">At Level 4, criteria stop being self-contained assertions and start carrying the threats they exist to stop (CTC) alongside the mitigations known to stop them (CTM). Below is the single worked example from the original proposal: SOC 2’s CC6.6, with the ALCOVE additions marked.</p>
+
+    <div class="tbl-shell" style="margin-top:var(--space-8)">
+      <div class="scroller">
+        <table class="tbl ctc-tbl" style="min-width:900px">
+          <thead>
+            <tr>
+              <th scope="col" style="width:20%">Trust Services Criteria</th>
+              <th scope="col" style="width:24%">Points of Focus</th>
+              <th scope="col" style="width:28%">Common Threat Criteria (CTC)</th>
+              <th scope="col" style="width:28%">Common Threat Mitigations (CTM)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style="font-weight:var(--fw-regular)">
+                <strong>CC6.6</strong><br>
+                The entity implements logical access security measures to protect against threats from sources outside its system boundaries.
+              </th>
+              <td>
+                <strong>Protects Identification and Authentication Credentials</strong><br><br>
+                Identification and authentication credentials are protected during transmission outside its system boundaries <span class="add">and protected from unauthorized transmission outside its system boundaries. Credentials are stored in encrypted forms.</span>
+              </td>
+              <td>
+                <ol>
+                  <li><span class="add">Credential Access</span>
+                    <ol style="list-style:lower-alpha">
+                      <li><span class="add">Unsecured Credentials: Credentials In Files</span></li>
+                      <li><span class="add">Unsecured Credentials: Chat Messages</span></li>
+                      <li><span class="add">Secrets in Config Files</span></li>
+                    </ol>
+                  </li>
+                </ol>
+                <span class="mat">Supporting evidence</span>
+                <ol>
+                  <li>EMERALDWHALE: 15k cloud credentials stolen in an operation targeting exposed Git config files</li>
+                  <li>DEV-0537 criminal actor targeting organizations for data exfiltration and destruction</li>
+                  <li>Verizon DBIR 2024: “[Use of stolen credentials] is still our top action at 24% [of breaches]”</li>
+                  <li>Codecov supply chain breach</li>
+                  <li>GitHub Action <code>tj-actions/changed-files</code> supply chain attack</li>
+                </ol>
+              </td>
+              <td>
+                <span class="mat">Maturity level 1</span>
+                <ol>
+                  <li><span class="add">Block plaintext credentials from being stored in source code repositories (using pre-commit hooks, push protection, etc.)</span></li>
+                  <li><span class="add">Regularly scan source code repositories for plaintext credentials</span></li>
+                  <li><span class="add">Disable or rotate all discovered plaintext credentials</span></li>
+                </ol>
+                <span class="mat">Maturity level 2</span>
+                <ol>
+                  <li><span class="add">Regularly scan productivity applications for plaintext credentials (e.g. Slack, Teams, Jira, Google Drive, etc.)</span></li>
+                </ol>
+                <span class="mat">Maturity level 3</span>
+                <ol>
+                  <li><span class="add">Detect plaintext credential exposures and exfiltration attempts in continuous integration (CI) systems</span></li>
+                </ol>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--text-body)"></i> Existing SOC 2 language</span>
+      <span><i style="background:var(--brand-accent)"></i> ALCOVE addition</span>
+    </div>
+
+    <p class="small muted" style="margin-top:var(--space-6);max-width:var(--prose-max)">This is the only worked example the proposal contains. A full CTC and CTM catalogue does not exist yet — building one is the substantive work Level 4 implies, and an open invitation.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ REPORTING ══ -->
+<section class="section" id="reporting" style="background:var(--surface-sunken);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)">
+  <div class="wrap">
+    <span class="eyebrow">The reporting artifact</span>
+    <h2>A PDF cannot describe a system that never stops moving</h2>
+    <p class="lede prose" style="margin-top:var(--space-5)">An audit report still matters — for context about the system, the architecture, the controls and the auditor’s opinion. But alongside it, control operating effectiveness needs metrics that carry <strong>current and historical</strong> state, the way status pages changed the conversation about uptime.</p>
+    <p class="prose">Trust Center products already publish control indicators. Most of them show only current state, and some remove a control and its green checkmark entirely while it is failing. That is assurance theatre. An honest artifact keeps the failure on the page.</p>
+
+    <div class="artifact" id="artifact">
+      <div class="artifact-head">
+        <h3>Historical control monitoring metrics</h3>
+        <span class="artifact-summary" id="artifact-summary">
+          <span class="ring" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+          </span>
+          <span id="artifact-summary-text">3 of 4 controls operating effectively</span>
+        </span>
+      </div>
+
+      <div id="controls"></div>
+
+      <noscript>
+        <p class="small muted">This demonstration renders 180 days of control history per control and needs JavaScript. The argument survives without it: a control’s operating effectiveness is a time series, and a static document can only ever show you one point on it.</p>
+      </noscript>
+
+      <p class="artifact-note"><strong>Illustrative.</strong> The proposal sketches what an ALCOVE reporting artifact could look like; this is that sketch made live. Each cell is one day. Hover or focus a cell for its state. Note the control that is currently degraded — it stays on the page.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ IMPLEMENTATIONS ══ -->
+<section class="section" id="implementations">
+  <div class="wrap">
+    <span class="eyebrow">Implementations</span>
+    <h2>What it would take to reach Levels 3 and 4</h2>
+    <p class="lede prose" style="margin-top:var(--space-5)">Levels 3 and 4 make demands that no compliance PDF can satisfy: a full population of evidence rather than a sample, a history that cannot be quietly rewritten, and a link from each control back to the threats it exists to stop. Those are infrastructure problems, and open-source infrastructure for them already exists.</p>
+
+    <div class="impl">
+      <article class="card impl-card">
+        <span class="kicker">Open protocol · Apache-2.0</span>
+        <h3>Corsair</h3>
+        <div class="pill-row">
+          <span class="pill pill--l3">Supports Level 3</span>
+          <span class="pill">Partial path to Level 4</span>
+        </div>
+        <p class="small" style="color:var(--text-body)">Corsair is an open compliance trust-exchange protocol: it takes what your security tools already found and signs it into a cryptographic proof anyone can verify, without an account. It was not designed against ALCOVE — but several of its primitives are exactly what Level 3 requires.</p>
+
+        <span class="kicker" style="margin-top:var(--space-5)">What it already does</span>
+        <ul class="impl-list">
+          <li><strong>Commits a whole evidence population</strong> to one signature — an append-only, hash-linked evidence chain reduced to a single Merkle root that is signed into the credential.</li>
+          <li><strong>Proves any single record belongs to that population</strong> via Merkle inclusion proofs, so an assessor can spot-check a claimed population without being handed all of it.</li>
+          <li><strong>Binds a proof to its exact source artifact</strong> by hashing the original document, so the underlying evidence cannot be swapped after signing.</li>
+          <li><strong>Keeps history append-only</strong> through SCITT registration, retaining retired signing keys so old proofs stay verifiable.</li>
+          <li><strong>Detects regressions between periods</strong> — <code>corsair diff</code> compares two signed proofs and can fail a build on a regression.</li>
+          <li><strong>Signals drift as it happens</strong> using OpenID SSF/CAEP events rather than waiting for the next audit.</li>
+        </ul>
+
+        <span class="kicker">What ALCOVE would still need to add</span>
+        <ul class="impl-list is-proposed">
+          <li><strong>Population completeness.</strong> Corsair proves a committed set is intact; it does not assert the set is <em>complete</em>. Level 3 turns on exactly that distinction.</li>
+          <li><strong>Transaction-level granularity.</strong> The finest signed granularity today is a control with a status, not the individual transactions or state samples behind it.</li>
+          <li><strong>CTC → CTM mappings in the signed artifact.</strong> Corsair carries threat-model summaries and has MITRE ATT&amp;CK lineage, but the control-to-threat mapping Level 4 rests on is not in the credential — its own roadmap marks threat-to-evidence as future work.</li>
+        </ul>
+
+        <p class="small" style="color:var(--text-body)">The CPOE specification defines a namespaced extension mechanism, which is a clean home for exactly these fields — an <code>ext.alcove</code> namespace carrying assurance level, population size and completeness, transaction-versus-state coverage, and CTC → CTM mappings. ALCOVE supplies the assurance semantics; Corsair supplies the verifiable envelope.</p>
+
+        <p style="margin-top:var(--space-5)">
+          <a class="link-arrow" href="https://grcorsair.com" rel="noopener">Visit grcorsair.com
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </p>
+        <p class="foot">Created and maintained by Ayoub Fandi. Early-stage and openly developed — capabilities above were read from its public specification and source, not from an ALCOVE conformance claim.</p>
+      </article>
+
+      <article class="card impl-card">
+        <span class="kicker">Open invitation</span>
+        <h3>Yours</h3>
+        <p class="small" style="color:var(--text-body)">ALCOVE is a proposal, not a certification scheme. There is no registry, no accreditation body, and nothing to buy. What there is: a set of levels precise enough to argue with, and a lot of unbuilt work.</p>
+
+        <span class="kicker" style="margin-top:var(--space-5)">What is genuinely open</span>
+        <ul class="impl-list is-proposed">
+          <li><strong>The CTC and CTM catalogue.</strong> One worked example exists. A usable Level 4 needs a real corpus of threats and the mitigations known to counter them.</li>
+          <li><strong>A definition of population completeness</strong> that an auditor could test and a machine could verify.</li>
+          <li><strong>Continuous control monitoring</strong> that retains state history for stateful technical controls, which is where the historical evidence for Level 3 has to come from.</li>
+          <li><strong>An honest reporting artifact</strong> that leaves failing controls visible.</li>
+          <li><strong>The incentive layer.</strong> Assurance this rigorous is unlikely to be bought voluntarily — cyber insurance is the most plausible forcing function.</li>
+        </ul>
+
+        <p style="margin-top:auto;padding-top:var(--space-2)">
+          <a class="link-arrow" href="https://discord.gg/CG6EDDbG4B" rel="noopener">Discuss it in the GRC Engineering Discord
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ INCENTIVES ══ -->
+<section class="section section--tight" id="incentives" style="border-top:1px solid var(--border-subtle)">
+  <div class="wrap">
+    <span class="eyebrow">The obstacle</span>
+    <h2>Incentives, not capability</h2>
+    <div class="grid-3" style="margin-top:var(--space-8)">
+      <div class="prose">
+        <p>Nothing above is technically out of reach. The obstacle is that today’s incentives all point the other way. Organisations are rewarded for cheaper, weaker audits. Auditors are rewarded for not upsetting the client. Third-party risk teams have neither the leverage nor the incentive to say no to a vendor with weak controls.</p>
+      </div>
+      <div class="prose">
+        <p>Everyone in the picture is optimising the same thing: spend fewer resources, get more value. Any framework that ignores that will be adopted by nobody.</p>
+        <p>The most plausible correction is the party with the most leverage and the strongest appetite for reducing uncertainty — <strong>cyber insurance</strong>.</p>
+      </div>
+      <div class="prose">
+        <p>Instead of a questionnaire once a year, vendors continuously publish control evidence; insurers price against it; auditors consume it instead of screenshots; and customers get assurance at diligence time <em>and</em> continuously afterwards.</p>
+        <p class="small muted">Prior art worth studying: AIUC-1’s AI assurance-plus-insurance framework, and usage-based insurance pricing built on continuous telemetry.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ ECOSYSTEM ══ -->
+<section class="section section--tight" id="ecosystem">
+  <div class="wrap">
+    <span class="eyebrow">Related work</span>
+    <h2>Where this comes from</h2>
+    <div class="eco">
+      <article class="card">
+        <h4>The original proposal</h4>
+        <p>“SOC 2 is dead, long live SOC 2” — the essay that introduced ALCOVE, its levels, and the SOC 2 Type III/IV extension.</p>
+        <a class="link-arrow" href="https://blog.grc.engineering/p/soc-2-is-dead-long-live-soc-2" rel="noopener">Read it
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </article>
+      <article class="card">
+        <h4>The GRC Engineering Manifesto</h4>
+        <p>ALCOVE is one attempt at core value #5: in-depth continuous assurance over shallow periodic monitoring.</p>
+        <a class="link-arrow" href="https://grc.engineering" rel="noopener">grc.engineering
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </article>
+      <article class="card">
+        <h4>Threat-Informed Control Modeling</h4>
+        <p>A GRC Engineering method for modelling a control against the threats it faces and the business it runs inside — the kind of reasoning a CTC/CTM corpus would need.</p>
+        <a class="link-arrow" href="https://github.com/grcengineering/threat-informed-control-modeling" rel="noopener">View TICM
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ CTA ══ -->
+<section class="section section--tight">
+  <div class="wrap">
+    <div class="cta">
+      <h2>Tell me where this is wrong</h2>
+      <p>ALCOVE is a proposal published in the open so it can be argued with. What would work, what would not, and what would make it more viable?</p>
+      <div class="hero-cta">
+        <a class="btn btn--primary" href="https://blog.grc.engineering/p/soc-2-is-dead-long-live-soc-2" rel="noopener">Read the proposal</a>
+        <a class="btn btn--on-ink" href="https://discord.gg/CG6EDDbG4B" rel="noopener">Join the discussion</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="small" style="margin:0">
+      ALCOVE is a proposal by <a href="https://grc.engineering" rel="noopener">the GRC Engineering community</a>. Free and open — fork it, argue with it, build it.
+    </p>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="https://grc.engineering" rel="noopener">Manifesto</a>
+      <a href="https://blog.grc.engineering" rel="noopener">Blog</a>
+      <a href="https://github.com/grcengineering" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/CG6EDDbG4B" rel="noopener">Discord</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>
