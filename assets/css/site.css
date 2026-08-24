@@ -47,10 +47,13 @@
   font-weight: var(--eyebrow-weight);
   letter-spacing: var(--eyebrow-tracking);
   text-transform: uppercase;
-  color: var(--brand-accent);
+  /* eng-blue-500 is only 3.34:1 on the near-white canvas — below AA for 11px
+     text. Light mode drops to eng-blue-700; dark keeps the bright accent. */
+  color: var(--eng-blue-700);
   margin: 0 0 var(--space-5);
   display: block;
 }
+[data-theme="dark"] .eyebrow { color: var(--brand-accent); }
 
 h1 { font-size: clamp(2.25rem, 6.2vw, var(--text-5xl)); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tighter); }
 h2 { font-size: clamp(1.75rem, 4.2vw, var(--text-3xl)); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-tighter); }
@@ -367,8 +370,16 @@ tr.is-alcove.is-l4 .type-cell { color: var(--lv4-fg); }
 .ctrl-name .pip { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .ctrl-uptime { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: var(--fw-medium); white-space: nowrap; }
 
-.strip { display: flex; gap: 2px; height: 34px; align-items: stretch; }
-.strip .day { flex: 1 1 0; min-width: 2px; border-radius: 2px; background: var(--strip-pass); position: relative; transform-origin: bottom; }
+/* 180 cells at 2px + 2px gaps need ~718px. Below that the strip scrolls inside
+   itself rather than widening the page (wide content never scrolls the body). */
+.strip { display: flex; gap: 2px; height: 34px; align-items: stretch; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.strip::-webkit-scrollbar { display: none; }
+.strip .day { flex: 1 0 2px; min-width: 2px; border-radius: 2px; background: var(--strip-pass); position: relative; transform-origin: bottom; }
+
+@media (max-width: 760px) {
+  .strip { gap: 1px; }
+  .strip .day { flex: 1 0 1px; min-width: 1px; border-radius: 1px; }
+}
 .strip .day.risk { background: var(--strip-risk); }
 .strip .day.fail { background: var(--strip-fail); }
 .strip .day.void { background: var(--strip-void); }
@@ -456,10 +467,16 @@ tr.is-alcove.is-l4 .type-cell { color: var(--lv4-fg); }
 /* ====================================================== LIGHT-MODE AA FIX ==== */
 /* A bright hue as small text over a ~0.15-alpha tint of the same hue fails AA
    on a near-white card. Darken the foreground in light mode only. */
-:root .pill--l3, :root tr.is-alcove .type-cell { color: #0F6B49; }
-:root .pill--l4, :root tr.is-alcove.is-l4 .type-cell { color: #114E67; }
-:root .level--2 .level-id .tag, :root .level--2 .level-id .num { color: #7A5300; }
-:root .level--1 .level-id .tag, :root .level--1 .level-id .num { color: #8A490C; }
+/* MUST be :root:not([data-theme="dark"]) — a bare :root matches the html element
+   in BOTH themes and would drag these dark AA-safe hues into dark mode. */
+:root:not([data-theme="dark"]) .pill--l3,
+:root:not([data-theme="dark"]) tr.is-alcove .type-cell { color: #0F6B49; }
+:root:not([data-theme="dark"]) .pill--l4,
+:root:not([data-theme="dark"]) tr.is-alcove.is-l4 .type-cell { color: #114E67; }
+:root:not([data-theme="dark"]) .level--2 .level-id .tag,
+:root:not([data-theme="dark"]) .level--2 .level-id .num { color: #7A5300; }
+:root:not([data-theme="dark"]) .level--1 .level-id .tag,
+:root:not([data-theme="dark"]) .level--1 .level-id .num { color: #8A490C; }
 
 /* ============================================================== SKIP LINK ==== */
 .skip {
@@ -484,6 +501,9 @@ tr.is-alcove.is-l4 .type-cell { color: var(--lv4-fg); }
   white-space: nowrap;
 }
 .wordmark .wm-o { display: block; flex: none; }
+/* .hero-mark sets display:block earlier in this file; .wordmark's inline-flex
+   would otherwise win on source order and park the mark beside the chip. */
+.wordmark.hero-mark { display: flex; width: fit-content; }
 .wordmark--sm { font-size: 22px; }
 .wordmark--sm .wm-o { width: 22px; height: 22px; margin: 0 1px; }
 .wordmark--lg { font-size: 46px; }
@@ -517,10 +537,10 @@ tr.is-alcove.is-l4 .type-cell { color: var(--lv4-fg); }
 .ladder--2 { --rung-bg: var(--lv2-bg); --rung-line: var(--lv2-line); --rung-fg: var(--lv2-fg); margin-right: 16%; }
 .ladder--3 { --rung-bg: var(--lv3-bg); --rung-line: var(--lv3-line); --rung-fg: var(--lv3-fg); margin-right: 8%; }
 .ladder--4 { --rung-bg: var(--lv4-bg); --rung-line: var(--lv4-line); --rung-fg: var(--lv4-fg); }
-:root .ladder--1 .lv { color: #8A490C; }
-:root .ladder--2 .lv { color: #7A5300; }
-:root .ladder--3 .lv { color: #0F6B49; }
-:root .ladder--4 .lv { color: #114E67; }
+:root:not([data-theme="dark"]) .ladder--1 .lv { color: #8A490C; }
+:root:not([data-theme="dark"]) .ladder--2 .lv { color: #7A5300; }
+:root:not([data-theme="dark"]) .ladder--3 .lv { color: #0F6B49; }
+:root:not([data-theme="dark"]) .ladder--4 .lv { color: #114E67; }
 
 @media (max-width: 560px) {
   .ladder--1, .ladder--2, .ladder--3 { margin-right: 0; }
