@@ -50,10 +50,11 @@ Supply-chain controls are bootstrapped and enforced by
 [sscs-bootstrapper](https://github.com/p4gs/sscs-bootstrapper); the enabled set
 is declared in `.sscsb/config.toml` and verifiable with `sscsb verify`.
 
-- **Secret scanning** — TruffleHog at pre-commit, pre-push and in CI. It is the
-  single credential-detection engine here on purpose: it verifies candidates
-  against the issuing provider, so a finding is a live secret rather than a
-  high-entropy string.
+- **Secret scanning** — TruffleHog and Gitleaks, both at pre-commit, pre-push
+  and in CI. TruffleHog verifies candidate credentials against the issuing
+  provider, so a finding there is a live secret rather than a high-entropy
+  string; Gitleaks runs alongside it to catch generic secrets and unverifiable
+  keys that TruffleHog's verified/unknown filter would otherwise drop.
 - **SAST** — OpenGrep against a committed ruleset, plus CodeQL on both
   `actions` and `javascript-typescript`.
 - **Dependencies** — Syft SBOM, Trivy and OSV-Scanner, Renovate with digest
